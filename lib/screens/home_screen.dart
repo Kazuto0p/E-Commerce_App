@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/product.dart';
-import '../services/product_service.dart';
-import '../widgets/product_card.dart';
-import 'cart_screen.dart';
+import 'home_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,57 +9,46 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Product> products = [];
-  bool isLoading = true;
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const HomeTab(),
+    const Center(child: Text("Search")),
+    const Center(child: Text("Profile")),
+  ];
 
   @override
-  void initState() {
-    super.initState();
-    loadProducts();
-  }
-
-  void loadProducts() async {
-    final data = await ProductService().fetchProducts();
-
-    setState(() {
-      products = data;
-      isLoading = false;
-    });
-  }
-
-  @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text("E-Commerce"),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.shopping_cart),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CartScreen(),
-              ),
-            );
-          },
-        ),
-      ],
-    ),
-
-    // 👇 THIS WAS MISSING
-    body: GridView.builder(
-      padding: const EdgeInsets.all(10),
-      itemCount: products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
       ),
-      itemBuilder: (context, index) {
-        return ProductCard(product: products[index]);
-      },
-    ),
-  );
-}
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
 }
